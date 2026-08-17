@@ -2,185 +2,2483 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Password Security Auditor</title>
 
     <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --green: #22c55e;
-            --red: #ef4444;
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
+
+        :root {
+            --bg: #050816;
+            --panel: rgba(10, 17, 38, 0.78);
+            --panel-light: rgba(20, 29, 55, 0.7);
+
+            --blue: #4f8cff;
+            --cyan: #22d3ee;
+            --purple: #a855f7;
+            --pink: #ec4899;
+
+            --green: #22c55e;
+            --yellow: #facc15;
+            --orange: #f97316;
+            --red: #ef4444;
+
+            --text: #f8fafc;
+            --muted: #8b9bb5;
+
+            --border: rgba(148, 163, 184, 0.13);
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
 
         body {
-            font-family: system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            color: var(--text);
+
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(79, 140, 255, 0.16),
+                    transparent 30%
+                ),
+
+                radial-gradient(
+                    circle at 90% 15%,
+                    rgba(168, 85, 247, 0.14),
+                    transparent 28%
+                ),
+
+                radial-gradient(
+                    circle at 50% 100%,
+                    rgba(34, 211, 238, 0.09),
+                    transparent 35%
+                ),
+
+                var(--bg);
+
+            overflow-x: hidden;
         }
 
-        .card {
-            width: 100%;
-            max-width: 420px;
-            background: var(--card);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+
+        /* =========================================================
+           ANIMATED GRID
+        ========================================================= */
+
+        .grid-background {
+            position: fixed;
+            inset: 0;
+
+            z-index: -5;
+
+            background-image:
+                linear-gradient(
+                    rgba(79, 140, 255, 0.035) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(79, 140, 255, 0.035) 1px,
+                    transparent 1px
+                );
+
+            background-size: 55px 55px;
+
+            animation: gridMove 18s linear infinite;
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    black,
+                    transparent 95%
+                );
         }
+
+
+        @keyframes gridMove {
+
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 55px 55px;
+            }
+
+        }
+
+
+        /* =========================================================
+           FLOATING GLOWS
+        ========================================================= */
+
+        .glow {
+            position: fixed;
+
+            width: 300px;
+            height: 300px;
+
+            border-radius: 50%;
+
+            filter: blur(100px);
+
+            opacity: 0.18;
+
+            z-index: -4;
+
+            pointer-events: none;
+        }
+
+
+        .glow.one {
+            background: var(--blue);
+
+            top: -120px;
+            left: -100px;
+
+            animation:
+                floatOne 10s ease-in-out infinite;
+        }
+
+
+        .glow.two {
+            background: var(--purple);
+
+            right: -100px;
+            bottom: -100px;
+
+            animation:
+                floatTwo 12s ease-in-out infinite;
+        }
+
+
+        .glow.three {
+            background: var(--cyan);
+
+            width: 180px;
+            height: 180px;
+
+            left: 45%;
+            top: 35%;
+
+            opacity: 0.08;
+
+            animation:
+                pulseGlow 6s ease-in-out infinite;
+        }
+
+
+        @keyframes floatOne {
+
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(80px, 60px);
+            }
+
+        }
+
+
+        @keyframes floatTwo {
+
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-70px, -50px);
+            }
+
+        }
+
+
+        @keyframes pulseGlow {
+
+            0%, 100% {
+                transform: scale(0.8);
+                opacity: 0.05;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.12;
+            }
+
+        }
+
+
+        /* =========================================================
+           PARTICLES
+        ========================================================= */
+
+        .particles {
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: -3;
+        }
+
+
+        .particle {
+            position: absolute;
+
+            width: 3px;
+            height: 3px;
+
+            border-radius: 50%;
+
+            background: var(--cyan);
+
+            box-shadow:
+                0 0 10px var(--cyan);
+
+            opacity: 0.45;
+
+            animation:
+                particleFloat linear infinite;
+        }
+
+
+        .particle:nth-child(1) {
+            left: 8%;
+            top: 25%;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(2) {
+            left: 18%;
+            top: 75%;
+            animation-duration: 12s;
+        }
+
+        .particle:nth-child(3) {
+            left: 30%;
+            top: 40%;
+            animation-duration: 10s;
+        }
+
+        .particle:nth-child(4) {
+            left: 45%;
+            top: 80%;
+            animation-duration: 14s;
+        }
+
+        .particle:nth-child(5) {
+            left: 60%;
+            top: 20%;
+            animation-duration: 11s;
+        }
+
+        .particle:nth-child(6) {
+            left: 75%;
+            top: 60%;
+            animation-duration: 9s;
+        }
+
+        .particle:nth-child(7) {
+            left: 90%;
+            top: 35%;
+            animation-duration: 13s;
+        }
+
+
+        @keyframes particleFloat {
+
+            0% {
+                transform:
+                    translateY(0)
+                    translateX(0);
+
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 0.5;
+            }
+
+            50% {
+                transform:
+                    translateY(-100px)
+                    translateX(30px);
+            }
+
+            80% {
+                opacity: 0.4;
+            }
+
+            100% {
+                transform:
+                    translateY(-220px)
+                    translateX(-20px);
+
+                opacity: 0;
+            }
+
+        }
+
+
+        /* =========================================================
+           NAVBAR
+        ========================================================= */
+
+        nav {
+            width: min(1180px, 92%);
+
+            margin: auto;
+
+            padding:
+                25px 0;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+
+        .brand {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 16px;
+
+            font-weight: 750;
+
+            letter-spacing: -0.3px;
+        }
+
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            border-radius: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--blue),
+                    var(--purple)
+                );
+
+            box-shadow:
+                0 0 25px
+                rgba(79, 140, 255, 0.4);
+
+            animation:
+                iconPulse 3s ease-in-out infinite;
+        }
+
+
+        .brand-icon::before {
+            content: "⌁";
+
+            color: white;
+
+            font-size: 24px;
+
+            font-weight: 900;
+        }
+
+
+        @keyframes iconPulse {
+
+            0%, 100% {
+                box-shadow:
+                    0 0 20px
+                    rgba(79, 140, 255, 0.3);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 35px
+                    rgba(168, 85, 247, 0.55);
+            }
+
+        }
+
+
+        .system-status {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding:
+                8px 14px;
+
+            border-radius: 999px;
+
+            border:
+                1px solid
+                rgba(34, 197, 94, 0.18);
+
+            background:
+                rgba(34, 197, 94, 0.05);
+
+            color: #86efac;
+
+            font-size: 11px;
+
+            font-weight: 600;
+        }
+
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--green);
+
+            box-shadow:
+                0 0 12px var(--green);
+
+            animation:
+                statusPulse 2s infinite;
+        }
+
+
+        @keyframes statusPulse {
+
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.35;
+            }
+
+        }
+
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        main {
+            width: min(1180px, 92%);
+
+            margin:
+                30px auto 80px;
+        }
+
+
+        .hero {
+            text-align: center;
+
+            margin-bottom: 42px;
+
+            animation:
+                fadeUp 0.8s ease both;
+        }
+
+
+        @keyframes fadeUp {
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        .eyebrow {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding:
+                7px 14px;
+
+            border-radius: 999px;
+
+            border:
+                1px solid
+                rgba(79, 140, 255, 0.25);
+
+            background:
+                rgba(79, 140, 255, 0.07);
+
+            color: #93c5fd;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.2px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 20px;
+        }
+
+
+        .eyebrow::before {
+            content: "";
+
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: var(--cyan);
+
+            box-shadow:
+                0 0 10px var(--cyan);
+        }
+
+
+        .hero h1 {
+            font-size:
+                clamp(38px, 6vw, 68px);
+
+            line-height: 1;
+
+            letter-spacing: -3px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .gradient-text {
+            background:
+                linear-gradient(
+                    90deg,
+                    #60a5fa,
+                    #22d3ee,
+                    #c084fc,
+                    #60a5fa
+                );
+
+            background-size: 300%;
+
+            -webkit-background-clip: text;
+background-clip: text;
+-webkit-text-fill-color: transparent;
+
+            animation:
+                gradientMove 5s ease infinite;
+        }
+
+
+        @keyframes gradientMove {
+
+            0% {
+                background-position: 0%;
+            }
+
+            50% {
+                background-position: 100%;
+            }
+
+            100% {
+                background-position: 0%;
+            }
+
+        }
+
+
+        .hero p {
+            max-width: 690px;
+
+            margin: auto;
+
+            color: var(--muted);
+
+            font-size: 15px;
+
+            line-height: 1.8;
+        }
+
+
+        /* =========================================================
+           DASHBOARD
+        ========================================================= */
+
+        .dashboard {
+            display: grid;
+
+            grid-template-columns:
+                0.9fr 1.1fr;
+
+            gap: 20px;
+        }
+
+
+        .panel {
+            position: relative;
+
+            overflow: hidden;
+
+            padding: 28px;
+
+            border-radius: 25px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(15, 23, 42, 0.88),
+                    rgba(8, 15, 32, 0.72)
+                );
+
+            border:
+                1px solid var(--border);
+
+            backdrop-filter:
+                blur(22px);
+
+            box-shadow:
+                0 35px 90px
+                rgba(0,0,0,0.35);
+
+            animation:
+                fadeUp 0.9s ease both;
+        }
+
+
+        .panel::before {
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+            left: -100%;
+
+            width: 60%;
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--cyan),
+                    transparent
+                );
+
+            animation:
+                scanLine 6s linear infinite;
+        }
+
+
+        @keyframes scanLine {
+
+            0% {
+                left: -60%;
+            }
+
+            50%, 100% {
+                left: 120%;
+            }
+
+        }
+
+
+        .panel::after {
+            content: "";
+
+            position: absolute;
+
+            width: 200px;
+            height: 200px;
+
+            border-radius: 50%;
+
+            right: -120px;
+            top: -120px;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(79,140,255,0.08),
+                    transparent 70%
+                );
+
+            pointer-events: none;
+        }
+
+
+        .panel-title {
+            color: var(--muted);
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.3px;
+
+            margin-bottom: 24px;
+        }
+
+
+        .panel-title strong {
+            color: var(--cyan);
+        }
+
+
+        /* =========================================================
+           PASSWORD INPUT
+        ========================================================= */
+
+        .input-label {
+            display: block;
+
+            color: #cbd5e1;
+
+            font-size: 12px;
+
+            margin-bottom: 9px;
+        }
+
+
+        .input-wrapper {
+            position: relative;
+        }
+
 
         input {
             width: 100%;
-            padding: 10px;
-            background: #0f172a;
-            border: 1px solid #334155;
+
+            padding:
+                17px 52px 17px 17px;
+
+            border-radius: 14px;
+
+            border:
+                1px solid
+                #263653;
+
+            background:
+                rgba(2, 6, 23, 0.65);
+
             color: white;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin: 8px 0 16px;
+
+            outline: none;
+
+            font-size: 15px;
+
+            transition:
+                0.25s;
         }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #2563eb;
-            color: white;
+
+        input:focus {
+            border-color: var(--cyan);
+
+            box-shadow:
+                0 0 0 4px
+                rgba(34,211,238,0.08),
+
+                0 0 30px
+                rgba(34,211,238,0.08);
+        }
+
+
+        .toggle-password {
+            position: absolute;
+
+            right: 14px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
             border: none;
-            border-radius: 4px;
-            font-weight: bold;
+
+            background: transparent;
+
+            color: var(--muted);
+
             cursor: pointer;
+
+            font-size: 16px;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 16px;
+
+        /* =========================================================
+           BUTTON
+        ========================================================= */
+
+        .analyze-btn {
+            position: relative;
+
+            overflow: hidden;
+
+            width: 100%;
+
+            margin-top: 15px;
+
+            padding: 16px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    #2563eb,
+                    #7c3aed,
+                    #0891b2
+                );
+
+            background-size: 200%;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 750;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 12px 35px
+                rgba(37,99,235,0.22);
+
+            transition:
+                0.3s;
+
+            animation:
+                buttonGradient 4s ease infinite;
+        }
+
+
+        @keyframes buttonGradient {
+
+            0% {
+                background-position: 0%;
+            }
+
+            50% {
+                background-position: 100%;
+            }
+
+            100% {
+                background-position: 0%;
+            }
+
+        }
+
+
+        .analyze-btn::before {
+            content: "";
+
+            position: absolute;
+
+            width: 100px;
+            height: 100%;
+
+            left: -150px;
+
+            top: 0;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255,255,255,0.25),
+                    transparent
+                );
+
+            transform:
+                skewX(-20deg);
+
+            animation:
+                buttonShine 4s infinite;
+        }
+
+
+        @keyframes buttonShine {
+
+            0%, 40% {
+                left: -150px;
+            }
+
+            65%, 100% {
+                left: 120%;
+            }
+
+        }
+
+
+        .analyze-btn:hover {
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+                0 18px 45px
+                rgba(37,99,235,0.35);
+        }
+
+
+        /* =========================================================
+           PRIVACY
+        ========================================================= */
+
+        .privacy-box {
+            display: flex;
+
+            gap: 12px;
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 15px;
+
+            border:
+                1px solid
+                rgba(34,197,94,0.12);
+
+            background:
+                rgba(34,197,94,0.035);
+        }
+
+
+        .privacy-icon {
+            font-size: 20px;
+        }
+
+
+        .privacy-box strong {
+            display: block;
+
+            font-size: 12px;
+
+            margin-bottom: 4px;
+        }
+
+
+        .privacy-box span {
+            color: var(--muted);
+
+            font-size: 10px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
+        #emptyState {
+            text-align: center;
+
+            padding:
+                45px 10px;
+        }
+
+
+        .radar {
+            position: relative;
+
+            width: 120px;
+            height: 120px;
+
+            margin:
+                0 auto 25px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid
+                rgba(34,211,238,0.25);
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(34,211,238,0.1),
+                    transparent 65%
+                );
+
+            animation:
+                radarPulse 3s infinite;
+        }
+
+
+        .radar::before,
+        .radar::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 18px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid
+                rgba(34,211,238,0.18);
+        }
+
+
+        .radar::after {
+            inset: 38px;
+        }
+
+
+        .radar-line {
+            position: absolute;
+
+            width: 50%;
+
+            height: 1px;
+
+            top: 50%;
+            left: 50%;
+
+            transform-origin:
+                left center;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--cyan),
+                    transparent
+                );
+
+            animation:
+                radarSpin 2.5s linear infinite;
+        }
+
+
+        @keyframes radarSpin {
+
+            from {
+                transform:
+                    rotate(0deg);
+            }
+
+            to {
+                transform:
+                    rotate(360deg);
+            }
+
+        }
+
+
+        @keyframes radarPulse {
+
+            0%, 100% {
+                box-shadow:
+                    0 0 15px
+                    rgba(34,211,238,0.08);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 45px
+                    rgba(34,211,238,0.18);
+            }
+
+        }
+
+
+        .empty-title {
+            font-weight: 750;
+
+            margin-bottom: 8px;
+        }
+
+
+        .empty-text {
+            color: #64748b;
+
+            font-size: 11px;
+
+            line-height: 1.7;
+        }
+
+
+        /* =========================================================
+           RESULTS
+        ========================================================= */
+
+        #results {
+            display: none;
+
+            animation:
+                resultAppear 0.7s ease both;
+        }
+
+
+        @keyframes resultAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    scale(0.96)
+                    translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    scale(1)
+                    translateY(0);
+            }
+
+        }
+
+
+        .score-area {
+            position: relative;
+
+            display: flex;
+
+            justify-content: center;
+
+            margin:
+                5px 0 28px;
+        }
+
+
+        .score-ring {
+            position: relative;
+
+            width: 200px;
+            height: 200px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background:
+                conic-gradient(
+                    var(--cyan)
+                    0deg,
+
+                    var(--purple)
+                    calc(var(--score) * 0.65),
+
+                    var(--blue)
+                    var(--score),
+
+                    rgba(51,65,85,0.3)
+                    var(--score),
+
+                    rgba(51,65,85,0.3)
+                    360deg
+                );
+
+            box-shadow:
+                0 0 55px
+                rgba(79,140,255,0.12),
+
+                inset
+                0 0 30px
+                rgba(34,211,238,0.05);
+
+            animation:
+                scoreGlow 3s ease-in-out infinite;
+        }
+
+
+        @keyframes scoreGlow {
+
+            0%, 100% {
+                filter:
+                    drop-shadow(
+                        0 0 5px
+                        rgba(34,211,238,0.15)
+                    );
+            }
+
+            50% {
+                filter:
+                    drop-shadow(
+                        0 0 18px
+                        rgba(168,85,247,0.25)
+                    );
+            }
+
+        }
+
+
+        .score-ring::before {
+            content: "";
+
+            position: absolute;
+
+            width: 164px;
+            height: 164px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #10192f,
+                    #070d1c
+                );
+
+            box-shadow:
+                inset
+                0 0 30px
+                rgba(0,0,0,0.45);
+        }
+
+
+        .score-content {
+            position: relative;
+
             text-align: center;
         }
 
-        .stat {
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 4px;
+
+        .score-number {
+            font-size: 43px;
+
+            font-weight: 850;
+
+            letter-spacing: -2px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    white,
+                    #93c5fd
+                );
+
+            -webkit-background-clip: text;
+background-clip: text;
+-webkit-text-fill-color: transparent;
         }
 
-        .stat-label {
-            font-size: 0.75rem;
+
+        .score-label {
             color: var(--muted);
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.5px;
         }
 
-        .stat-val {
-            font-size: 1.2rem;
-            font-weight: bold;
+
+        /* =========================================================
+           METRICS
+        ========================================================= */
+
+        .metrics {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 11px;
         }
+
+
+        .metric {
+            padding: 16px;
+
+            border-radius: 15px;
+
+            background:
+                rgba(2,6,23,0.45);
+
+            border:
+                1px solid
+                rgba(148,163,184,0.08);
+
+            transition:
+                0.3s;
+
+            animation:
+                metricAppear 0.6s ease both;
+        }
+
+
+        .metric:hover {
+            transform:
+                translateY(-4px);
+
+            border-color:
+                rgba(79,140,255,0.25);
+
+            background:
+                rgba(20,29,55,0.7);
+
+            box-shadow:
+                0 10px 30px
+                rgba(0,0,0,0.2);
+        }
+
+
+        @keyframes metricAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+
+        }
+
+
+        .metric-header {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            margin-bottom: 9px;
+        }
+
+
+        .metric-name {
+            color: var(--muted);
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+        }
+
+
+        .metric-icon {
+            font-size: 14px;
+        }
+
+
+        .metric-value {
+            font-size: 23px;
+
+            font-weight: 800;
+        }
+
+
+        /* =========================================================
+           RISK
+        ========================================================= */
+
+        .risk-box {
+            position: relative;
+
+            overflow: hidden;
+
+            margin-top: 11px;
+
+            padding: 18px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(79,140,255,0.06),
+                    rgba(168,85,247,0.05)
+                );
+
+            border:
+                1px solid
+                rgba(79,140,255,0.12);
+        }
+
+
+        .risk-box::before {
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            right: 0;
+
+            top: 0;
+
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--cyan),
+                    var(--purple),
+                    transparent
+                );
+
+            animation:
+                riskScan 3s linear infinite;
+        }
+
+
+        @keyframes riskScan {
+
+            from {
+                transform:
+                    translateX(-100%);
+            }
+
+            to {
+                transform:
+                    translateX(100%);
+            }
+
+        }
+
+
+        .risk-label {
+            color: var(--muted);
+
+            font-size: 9px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1.4px;
+        }
+
+
+        #overall {
+            margin-top: 6px;
+
+            font-size: 20px;
+
+            font-weight: 850;
+        }
+
+
+        /* =========================================================
+           STATUS
+        ========================================================= */
+
+        .status {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 10px;
+
+            margin-top: 13px;
+
+            color: #64748b;
+
+            font-size: 9px;
+        }
+
+
+        .status span:first-child {
+            color: #4ade80;
+        }
+
+
+        /* =========================================================
+           LOADING
+        ========================================================= */
+
+        .loading {
+            display: none;
+
+            text-align: center;
+
+            margin-top: 13px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+        }
+
+
+        .spinner {
+            display: inline-block;
+
+            width: 13px;
+            height: 13px;
+
+            border:
+                2px solid
+                #263653;
+
+            border-top-color:
+                var(--cyan);
+
+            border-right-color:
+                var(--purple);
+
+            border-radius: 50%;
+
+            animation:
+                spin 0.7s linear infinite;
+
+            vertical-align: middle;
+
+            margin-right: 5px;
+        }
+
+
+        @keyframes spin {
+
+            to {
+                transform:
+                    rotate(360deg);
+            }
+
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        footer {
+            text-align: center;
+
+            margin-top: 30px;
+
+            color: #475569;
+
+            font-size: 10px;
+        }
+
+
+        footer span {
+            color: #64748b;
+        }
+
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 850px) {
+
+            .dashboard {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .system-status {
+                display: none;
+            }
+
+        }
+
+
+        @media (max-width: 500px) {
+
+            nav {
+                padding-top: 18px;
+            }
+
+            main {
+                margin-top: 15px;
+            }
+
+            .hero h1 {
+                letter-spacing: -2px;
+            }
+
+            .panel {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .metrics {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .score-ring {
+                width: 175px;
+                height: 175px;
+            }
+
+            .score-ring::before {
+                width: 145px;
+                height: 145px;
+            }
+
+        }
+
     </style>
 </head>
 
+
 <body>
 
-    <div class="card">
 
-        <h2>Password Security Auditor</h2>
+<!-- =========================================================
+     BACKGROUND
+========================================================= -->
 
-        <label for="pw">Password</label>
+<div class="grid-background"></div>
 
-        <input
-            type="password"
-            id="pw"
-            placeholder="••••••••••••"
-        >
+<div class="glow one"></div>
+<div class="glow two"></div>
+<div class="glow three"></div>
 
-        <button onclick="audit()">
-            Analyze Password
-        </button>
 
-        <div id="results" style="display:none; margin-top:16px;">
+<div class="particles">
 
-            <div class="grid">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
 
-                <div class="stat">
-                    <span class="stat-label">STRENGTH</span>
-                    <div id="strength" class="stat-val">
-                        0/100
-                    </div>
-                </div>
+</div>
 
-                <div class="stat">
-                    <span class="stat-label">BREACH RISK</span>
-                    <div id="breach" class="stat-val">
-                        0/100
-                    </div>
-                </div>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<nav>
+
+    <div class="brand">
+
+        <div class="brand-icon"></div>
+
+        Password Auditor
+
+    </div>
+
+
+    <div class="system-status">
+
+        <span class="status-dot"></span>
+
+        SECURITY SYSTEM ONLINE
+
+    </div>
+
+</nav>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main>
+
+
+    <section class="hero">
+
+        <div class="eyebrow">
+            Password Intelligence Engine
+        </div>
+
+
+        <h1>
+
+            Don't guess your security.
+
+            <br>
+
+            <span class="gradient-text">
+                Measure it.
+            </span>
+
+        </h1>
+
+
+        <p>
+
+            Analyze password strength, detect predictable
+            patterns and identify exposure in known data
+            breaches using privacy-preserving analysis.
+
+        </p>
+
+    </section>
+
+
+
+    <section class="dashboard">
+
+
+        <!-- =====================================================
+             INPUT PANEL
+        ====================================================== -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+
+                <strong>01</strong>
+
+                &nbsp; SECURITY INPUT
 
             </div>
 
-            <div style="text-align:center; margin-top:12px;">
 
-                <span class="stat-label">
-                    OVERALL RISK
-                </span>
+            <label
+                class="input-label"
+                for="pw"
+            >
 
-                <div
-                    id="overall"
-                    style="font-size:1.3rem; font-weight:bold;"
+                Enter password
+
+            </label>
+
+
+            <div class="input-wrapper">
+
+                <input
+                    type="password"
+                    id="pw"
+                    placeholder="Enter password..."
+                    autocomplete="off"
                 >
-                    --
+
+
+                <button
+                    type="button"
+                    class="toggle-password"
+                    onclick="togglePassword()"
+                >
+
+                    ◉
+
+                </button>
+
+            </div>
+
+
+            <button
+                class="analyze-btn"
+                id="analyzeBtn"
+                onclick="audit()"
+            >
+
+                Analyze Security
+                &nbsp; →
+
+            </button>
+
+
+            <div
+                class="loading"
+                id="loading"
+            >
+
+                <span class="spinner"></span>
+
+                Scanning password intelligence...
+
+            </div>
+
+
+            <div class="privacy-box">
+
+                <div class="privacy-icon">
+                    🛡️
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Privacy-preserving scan
+                    </strong>
+
+
+                    <span>
+
+                        Your plaintext password never leaves
+                        this application. The breach lookup
+                        uses a partial SHA-1 hash.
+
+                    </span>
+
                 </div>
 
             </div>
 
         </div>
 
-    </div>
 
-    <script>
 
-        async function audit() {
+        <!-- =====================================================
+             RESULTS PANEL
+        ====================================================== -->
 
-            const password =
-                document.getElementById("pw").value;
+        <div class="panel">
 
-            if (!password) return;
+            <div class="panel-title">
 
-            const res = await fetch("/audit", {
+                <strong>02</strong>
 
-                method: "POST",
+                &nbsp; SECURITY TELEMETRY
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+            </div>
 
-                body: JSON.stringify({
-                    password: password
-                })
 
-            });
+            <!-- EMPTY -->
 
-            const data = await res.json();
+            <div id="emptyState">
 
-            document.getElementById("results")
-                .style.display = "block";
+                <div class="radar">
 
-            document.getElementById("strength")
-                .innerText =
-                `${data.metrics.strength_score}/100`;
+                    <div class="radar-line"></div>
 
-            document.getElementById("breach")
-                .innerText =
-                `${data.metrics.breach_risk_score}/100`;
+                </div>
 
-            document.getElementById("overall")
-                .innerText =
-                data.metrics.overall_risk;
+
+                <div class="empty-title">
+
+                    Awaiting security scan
+
+                </div>
+
+
+                <div class="empty-text">
+
+                    Enter a password to initialize
+                    the security analysis engine.
+
+                </div>
+
+            </div>
+
+
+            <!-- RESULTS -->
+
+            <div id="results">
+
+
+                <div class="score-area">
+
+                    <div
+                        class="score-ring"
+                        id="scoreRing"
+                        style="--score: 0deg;"
+                    >
+
+                        <div class="score-content">
+
+                            <div
+                                class="score-number"
+                                id="strength"
+                            >
+                                0
+                            </div>
+
+
+                            <div class="score-label">
+
+                                Security Score
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="metrics">
+
+
+                    <div class="metric">
+
+                        <div class="metric-header">
+
+                            <span class="metric-name">
+                                Password Strength
+                            </span>
+
+                            <span class="metric-icon">
+                                ⚡
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="metric-value"
+                            id="strengthSmall"
+                        >
+                            0/100
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="metric">
+
+                        <div class="metric-header">
+
+                            <span class="metric-name">
+                                Breach Exposure
+                            </span>
+
+                            <span class="metric-icon">
+                                🛡️
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="metric-value"
+                            id="breach"
+                        >
+                            0/100
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="risk-box">
+
+                    <div class="risk-label">
+
+                        Overall Threat Assessment
+
+                    </div>
+
+
+                    <div id="overall">
+
+                        --
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="status">
+
+                    <span>
+                        ● Analysis complete
+                    </span>
+
+
+                    <span id="breachStatus">
+                        Awaiting scan
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+
+        Password Security Auditor
+
+        <span>•</span>
+
+        Privacy-first password intelligence
+
+        <span>•</span>
+
+        Local analysis engine
+
+    </footer>
+
+</main>
+
+
+
+<script>
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================= */
+
+    function togglePassword() {
+
+        const password =
+            document.getElementById("pw");
+
+        if (
+            password.type === "password"
+        ) {
+
+            password.type = "text";
+
+        } else {
+
+            password.type = "password";
+
         }
 
-    </script>
+    }
+
+
+
+    /* =========================================================
+       NUMBER ANIMATION
+    ========================================================= */
+
+    function animateNumber(
+        element,
+        target,
+        duration = 800
+    ) {
+
+        let start = 0;
+
+        const startTime =
+            performance.now();
+
+
+        function update(currentTime) {
+
+            const progress =
+                Math.min(
+                    (currentTime - startTime) /
+                    duration,
+                    1
+                );
+
+
+            const eased =
+                1 -
+                Math.pow(
+                    1 - progress,
+                    3
+                );
+
+
+            const current =
+                Math.round(
+                    start +
+                    (target - start) *
+                    eased
+                );
+
+
+            element.innerText =
+                current;
+
+
+            if (progress < 1) {
+
+                requestAnimationFrame(update);
+
+            }
+
+        }
+
+
+        requestAnimationFrame(update);
+
+    }
+
+
+
+    /* =========================================================
+       AUDIT
+    ========================================================= */
+
+    async function audit() {
+
+        const password =
+            document
+                .getElementById("pw")
+                .value;
+
+
+        if (!password) {
+
+            alert(
+                "Please enter a password first."
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            document
+                .getElementById("analyzeBtn");
+
+
+        const loading =
+            document
+                .getElementById("loading");
+
+
+        button.disabled = true;
+
+        button.style.opacity =
+            "0.6";
+
+
+        loading.style.display =
+            "block";
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    "/audit",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                password:
+                                    password
+                            })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Security audit failed"
+                );
+
+            }
+
+
+            /* Hide empty state */
+
+            document
+                .getElementById(
+                    "emptyState"
+                )
+                .style.display =
+                "none";
+
+
+            /* Show results */
+
+            document
+                .getElementById(
+                    "results"
+                )
+                .style.display =
+                "block";
+
+
+            const strength =
+                Number(
+                    data.metrics
+                        .strength_score
+                );
+
+
+            const breach =
+                data.metrics
+                    .breach_risk_score;
+
+
+            /* Score */
+
+            const scoreElement =
+                document
+                    .getElementById(
+                        "strength"
+                    );
+
+
+            animateNumber(
+                scoreElement,
+                strength
+            );
+
+
+            /* Small strength */
+
+            document
+                .getElementById(
+                    "strengthSmall"
+                )
+                .innerText =
+                `${strength}/100`;
+
+
+            /* Breach */
+
+            document
+                .getElementById(
+                    "breach"
+                )
+                .innerText =
+                breach === null
+                    ? "N/A"
+                    : `${breach}/100`;
+
+
+            /* Overall */
+
+            const overall =
+                document
+                    .getElementById(
+                        "overall"
+                    );
+
+
+            overall.innerText =
+                data.metrics
+                    .overall_risk;
+
+
+            /* Breach status */
+
+            document
+                .getElementById(
+                    "breachStatus"
+                )
+                .innerText =
+                data.breach_status;
+
+
+            /* =================================================
+               SCORE RING
+            ================================================= */
+
+            const degrees =
+                (strength / 100) *
+                360;
+
+
+            document
+                .getElementById(
+                    "scoreRing"
+                )
+                .style
+                .setProperty(
+                    "--score",
+                    `${degrees}deg`
+                );
+
+
+            /* =================================================
+               RISK COLORS
+            ================================================= */
+
+            if (
+                data.metrics
+                    .overall_risk
+                    .includes("CRITICAL")
+            ) {
+
+                overall.style.color =
+                    "#ef4444";
+
+
+            } else if (
+                data.metrics
+                    .overall_risk
+                    .includes("HIGH")
+            ) {
+
+                overall.style.color =
+                    "#f97316";
+
+
+            } else if (
+                data.metrics
+                    .overall_risk
+                    .includes("MODERATE")
+            ) {
+
+                overall.style.color =
+                    "#facc15";
+
+
+            } else {
+
+                overall.style.color =
+                    "#22c55e";
+
+            }
+
+
+            /* =================================================
+               SCORE RING COLOR
+            ================================================= */
+
+            const ring =
+                document
+                    .getElementById(
+                        "scoreRing"
+                    );
+
+
+            if (strength < 30) {
+
+                ring.style.background =
+                    `conic-gradient(
+                        #ef4444
+                        0deg,
+                        #f97316
+                        ${degrees}deg,
+                        rgba(51,65,85,.3)
+                        ${degrees}deg
+                    )`;
+
+            } else if (strength < 60) {
+
+                ring.style.background =
+                    `conic-gradient(
+                        #facc15
+                        0deg,
+                        #f97316
+                        ${degrees}deg,
+                        rgba(51,65,85,.3)
+                        ${degrees}deg
+                    )`;
+
+            } else {
+
+                ring.style.background =
+                    `conic-gradient(
+                        #22d3ee
+                        0deg,
+                        #8b5cf6
+                        ${degrees}deg,
+                        rgba(51,65,85,.3)
+                        ${degrees}deg
+                    )`;
+
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            alert(
+                "Unable to analyze password:\n" +
+                error.message
+            );
+
+
+        } finally {
+
+            button.disabled =
+                false;
+
+            button.style.opacity =
+                "1";
+
+            loading.style.display =
+                "none";
+
+        }
+
+    }
+
+
+
+    /* =========================================================
+       ENTER KEY
+    ========================================================= */
+
+    document
+        .getElementById("pw")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    audit();
+
+                }
+
+            }
+        );
+
+</script>
+
 
 </body>
 </html>
