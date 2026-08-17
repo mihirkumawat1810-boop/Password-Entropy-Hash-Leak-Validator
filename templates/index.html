@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Password Security Auditor</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --green: #22c55e; --red: #ef4444; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { width: 100%; max-width: 420px; background: var(--card); border-radius: 8px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; margin: 8px 0 16px; }
+        button { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; text-align: center; }
+        .stat { background: #0f172a; padding: 10px; border-radius: 4px; }
+        .stat-label { font-size: 0.75rem; color: var(--muted); }
+        .stat-val { font-size: 1.2rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Password Security Auditor</h2>
+        <label for="pw">Password</label>
+        <input type="password" id="pw" placeholder="••••••••••••">
+        <button onclick="audit()">Analyze Password</button>
+
+        <div id="results" style="display:none; margin-top: 16px;">
+            <div class="grid">
+                <div class="stat"><span class="stat-label">STRENGTH</span><div id="strength" class="stat-val">0/100</div></div>
+                <div class="stat"><span class="stat-label">BREACH RISK</span><div id="breach" class="stat-val">0/100</div></div>
+            </div>
+            <div style="text-align:center; margin-top:12px;">
+                <span class="stat-label">OVERALL RISK</span>
+                <div id="overall" style="font-size: 1.3rem; font-weight:bold;">--</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function audit() {
+            const password = document.getElementById("pw").value;
+            if(!password) return;
+            const res = await fetch("/audit", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+            document.getElementById("results").style.display = "block";
+            document.getElementById("strength").innerText = `${data.metrics.strength_score}/100`;
+            document.getElementById("breach").innerText = `${data.metrics.breach_risk_score}/100`;
+            document.getElementById("overall").innerText = data.metrics.overall_risk;
+        </script>
+</body>
+</html>
