@@ -1,2484 +1,511 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Password Security Auditor</title>
-
-    <style>
-
-        /* =========================================================
-           GLOBAL
-        ========================================================= */
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --bg: #050816;
-            --panel: rgba(10, 17, 38, 0.78);
-            --panel-light: rgba(20, 29, 55, 0.7);
-
-            --blue: #4f8cff;
-            --cyan: #22d3ee;
-            --purple: #a855f7;
-            --pink: #ec4899;
-
-            --green: #22c55e;
-            --yellow: #facc15;
-            --orange: #f97316;
-            --red: #ef4444;
-
-            --text: #f8fafc;
-            --muted: #8b9bb5;
-
-            --border: rgba(148, 163, 184, 0.13);
-        }
-
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-
-        body {
-            min-height: 100vh;
-
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-
-            color: var(--text);
-
-            background:
-                radial-gradient(
-                    circle at 10% 10%,
-                    rgba(79, 140, 255, 0.16),
-                    transparent 30%
-                ),
-
-                radial-gradient(
-                    circle at 90% 15%,
-                    rgba(168, 85, 247, 0.14),
-                    transparent 28%
-                ),
-
-                radial-gradient(
-                    circle at 50% 100%,
-                    rgba(34, 211, 238, 0.09),
-                    transparent 35%
-                ),
-
-                var(--bg);
-
-            overflow-x: hidden;
-        }
-
-
-        /* =========================================================
-           ANIMATED GRID
-        ========================================================= */
-
-        .grid-background {
-            position: fixed;
-            inset: 0;
-
-            z-index: -5;
-
-            background-image:
-                linear-gradient(
-                    rgba(79, 140, 255, 0.035) 1px,
-                    transparent 1px
-                ),
-                linear-gradient(
-                    90deg,
-                    rgba(79, 140, 255, 0.035) 1px,
-                    transparent 1px
-                );
-
-            background-size: 55px 55px;
-
-            animation: gridMove 18s linear infinite;
-
-            mask-image:
-                linear-gradient(
-                    to bottom,
-                    black,
-                    transparent 95%
-                );
-        }
-
-
-        @keyframes gridMove {
-
-            from {
-                background-position: 0 0;
-            }
-
-            to {
-                background-position: 55px 55px;
-            }
-
-        }
-
-
-        /* =========================================================
-           FLOATING GLOWS
-        ========================================================= */
-
-        .glow {
-            position: fixed;
-
-            width: 300px;
-            height: 300px;
-
-            border-radius: 50%;
-
-            filter: blur(100px);
-
-            opacity: 0.18;
-
-            z-index: -4;
-
-            pointer-events: none;
-        }
-
-
-        .glow.one {
-            background: var(--blue);
-
-            top: -120px;
-            left: -100px;
-
-            animation:
-                floatOne 10s ease-in-out infinite;
-        }
-
-
-        .glow.two {
-            background: var(--purple);
-
-            right: -100px;
-            bottom: -100px;
-
-            animation:
-                floatTwo 12s ease-in-out infinite;
-        }
-
-
-        .glow.three {
-            background: var(--cyan);
-
-            width: 180px;
-            height: 180px;
-
-            left: 45%;
-            top: 35%;
-
-            opacity: 0.08;
-
-            animation:
-                pulseGlow 6s ease-in-out infinite;
-        }
-
-
-        @keyframes floatOne {
-
-            0%, 100% {
-                transform: translate(0, 0);
-            }
-
-            50% {
-                transform: translate(80px, 60px);
-            }
-
-        }
-
-
-        @keyframes floatTwo {
-
-            0%, 100% {
-                transform: translate(0, 0);
-            }
-
-            50% {
-                transform: translate(-70px, -50px);
-            }
-
-        }
-
-
-        @keyframes pulseGlow {
-
-            0%, 100% {
-                transform: scale(0.8);
-                opacity: 0.05;
-            }
-
-            50% {
-                transform: scale(1.5);
-                opacity: 0.12;
-            }
-
-        }
-
-
-        /* =========================================================
-           PARTICLES
-        ========================================================= */
-
-        .particles {
-            position: fixed;
-            inset: 0;
-
-            pointer-events: none;
-
-            z-index: -3;
-        }
-
-
-        .particle {
-            position: absolute;
-
-            width: 3px;
-            height: 3px;
-
-            border-radius: 50%;
-
-            background: var(--cyan);
-
-            box-shadow:
-                0 0 10px var(--cyan);
-
-            opacity: 0.45;
-
-            animation:
-                particleFloat linear infinite;
-        }
-
-
-        .particle:nth-child(1) {
-            left: 8%;
-            top: 25%;
-            animation-duration: 8s;
-        }
-
-        .particle:nth-child(2) {
-            left: 18%;
-            top: 75%;
-            animation-duration: 12s;
-        }
-
-        .particle:nth-child(3) {
-            left: 30%;
-            top: 40%;
-            animation-duration: 10s;
-        }
-
-        .particle:nth-child(4) {
-            left: 45%;
-            top: 80%;
-            animation-duration: 14s;
-        }
-
-        .particle:nth-child(5) {
-            left: 60%;
-            top: 20%;
-            animation-duration: 11s;
-        }
-
-        .particle:nth-child(6) {
-            left: 75%;
-            top: 60%;
-            animation-duration: 9s;
-        }
-
-        .particle:nth-child(7) {
-            left: 90%;
-            top: 35%;
-            animation-duration: 13s;
-        }
-
-
-        @keyframes particleFloat {
-
-            0% {
-                transform:
-                    translateY(0)
-                    translateX(0);
-
-                opacity: 0;
-            }
-
-            20% {
-                opacity: 0.5;
-            }
-
-            50% {
-                transform:
-                    translateY(-100px)
-                    translateX(30px);
-            }
-
-            80% {
-                opacity: 0.4;
-            }
-
-            100% {
-                transform:
-                    translateY(-220px)
-                    translateX(-20px);
-
-                opacity: 0;
-            }
-
-        }
-
-
-        /* =========================================================
-           NAVBAR
-        ========================================================= */
-
-        nav {
-            width: min(1180px, 92%);
-
-            margin: auto;
-
-            padding:
-                25px 0;
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-        }
-
-
-        .brand {
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-
-            font-size: 16px;
-
-            font-weight: 750;
-
-            letter-spacing: -0.3px;
-        }
-
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-
-            display: flex;
-
-            justify-content: center;
-            align-items: center;
-
-            border-radius: 13px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--blue),
-                    var(--purple)
-                );
-
-            box-shadow:
-                0 0 25px
-                rgba(79, 140, 255, 0.4);
-
-            animation:
-                iconPulse 3s ease-in-out infinite;
-        }
-
-
-        .brand-icon::before {
-            content: "⌁";
-
-            color: white;
-
-            font-size: 24px;
-
-            font-weight: 900;
-        }
-
-
-        @keyframes iconPulse {
-
-            0%, 100% {
-                box-shadow:
-                    0 0 20px
-                    rgba(79, 140, 255, 0.3);
-            }
-
-            50% {
-                box-shadow:
-                    0 0 35px
-                    rgba(168, 85, 247, 0.55);
-            }
-
-        }
-
-
-        .system-status {
-            display: flex;
-
-            align-items: center;
-
-            gap: 9px;
-
-            padding:
-                8px 14px;
-
-            border-radius: 999px;
-
-            border:
-                1px solid
-                rgba(34, 197, 94, 0.18);
-
-            background:
-                rgba(34, 197, 94, 0.05);
-
-            color: #86efac;
-
-            font-size: 11px;
-
-            font-weight: 600;
-        }
-
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-
-            border-radius: 50%;
-
-            background: var(--green);
-
-            box-shadow:
-                0 0 12px var(--green);
-
-            animation:
-                statusPulse 2s infinite;
-        }
-
-
-        @keyframes statusPulse {
-
-            0%, 100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.35;
-            }
-
-        }
-
-
-        /* =========================================================
-           MAIN
-        ========================================================= */
-
-        main {
-            width: min(1180px, 92%);
-
-            margin:
-                30px auto 80px;
-        }
-
-
-        .hero {
-            text-align: center;
-
-            margin-bottom: 42px;
-
-            animation:
-                fadeUp 0.8s ease both;
-        }
-
-
-        @keyframes fadeUp {
-
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-        }
-
-
-        .eyebrow {
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            padding:
-                7px 14px;
-
-            border-radius: 999px;
-
-            border:
-                1px solid
-                rgba(79, 140, 255, 0.25);
-
-            background:
-                rgba(79, 140, 255, 0.07);
-
-            color: #93c5fd;
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            letter-spacing: 1.2px;
-
-            text-transform: uppercase;
-
-            margin-bottom: 20px;
-        }
-
-
-        .eyebrow::before {
-            content: "";
-
-            width: 6px;
-            height: 6px;
-
-            border-radius: 50%;
-
-            background: var(--cyan);
-
-            box-shadow:
-                0 0 10px var(--cyan);
-        }
-
-
-        .hero h1 {
-            font-size:
-                clamp(38px, 6vw, 68px);
-
-            line-height: 1;
-
-            letter-spacing: -3px;
-
-            margin-bottom: 20px;
-        }
-
-
-        .gradient-text {
-            background:
-                linear-gradient(
-                    90deg,
-                    #60a5fa,
-                    #22d3ee,
-                    #c084fc,
-                    #60a5fa
-                );
-
-            background-size: 300%;
-
-            -webkit-background-clip: text;
-background-clip: text;
--webkit-text-fill-color: transparent;
-
-            animation:
-                gradientMove 5s ease infinite;
-        }
-
-
-        @keyframes gradientMove {
-
-            0% {
-                background-position: 0%;
-            }
-
-            50% {
-                background-position: 100%;
-            }
-
-            100% {
-                background-position: 0%;
-            }
-
-        }
-
-
-        .hero p {
-            max-width: 690px;
-
-            margin: auto;
-
-            color: var(--muted);
-
-            font-size: 15px;
-
-            line-height: 1.8;
-        }
-
-
-        /* =========================================================
-           DASHBOARD
-        ========================================================= */
-
-        .dashboard {
-            display: grid;
-
-            grid-template-columns:
-                0.9fr 1.1fr;
-
-            gap: 20px;
-        }
-
-
-        .panel {
-            position: relative;
-
-            overflow: hidden;
-
-            padding: 28px;
-
-            border-radius: 25px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(15, 23, 42, 0.88),
-                    rgba(8, 15, 32, 0.72)
-                );
-
-            border:
-                1px solid var(--border);
-
-            backdrop-filter:
-                blur(22px);
-
-            box-shadow:
-                0 35px 90px
-                rgba(0,0,0,0.35);
-
-            animation:
-                fadeUp 0.9s ease both;
-        }
-
-
-        .panel::before {
-            content: "";
-
-            position: absolute;
-
-            top: 0;
-            left: -100%;
-
-            width: 60%;
-            height: 1px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    var(--cyan),
-                    transparent
-                );
-
-            animation:
-                scanLine 6s linear infinite;
-        }
-
-
-        @keyframes scanLine {
-
-            0% {
-                left: -60%;
-            }
-
-            50%, 100% {
-                left: 120%;
-            }
-
-        }
-
-
-        .panel::after {
-            content: "";
-
-            position: absolute;
-
-            width: 200px;
-            height: 200px;
-
-            border-radius: 50%;
-
-            right: -120px;
-            top: -120px;
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(79,140,255,0.08),
-                    transparent 70%
-                );
-
-            pointer-events: none;
-        }
-
-
-        .panel-title {
-            color: var(--muted);
-
-            font-size: 11px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1.3px;
-
-            margin-bottom: 24px;
-        }
-
-
-        .panel-title strong {
-            color: var(--cyan);
-        }
-
-
-        /* =========================================================
-           PASSWORD INPUT
-        ========================================================= */
-
-        .input-label {
-            display: block;
-
-            color: #cbd5e1;
-
-            font-size: 12px;
-
-            margin-bottom: 9px;
-        }
-
-
-        .input-wrapper {
-            position: relative;
-        }
-
-
-        input {
-            width: 100%;
-
-            padding:
-                17px 52px 17px 17px;
-
-            border-radius: 14px;
-
-            border:
-                1px solid
-                #263653;
-
-            background:
-                rgba(2, 6, 23, 0.65);
-
-            color: white;
-
-            outline: none;
-
-            font-size: 15px;
-
-            transition:
-                0.25s;
-        }
-
-
-        input:focus {
-            border-color: var(--cyan);
-
-            box-shadow:
-                0 0 0 4px
-                rgba(34,211,238,0.08),
-
-                0 0 30px
-                rgba(34,211,238,0.08);
-        }
-
-
-        .toggle-password {
-            position: absolute;
-
-            right: 14px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            border: none;
-
-            background: transparent;
-
-            color: var(--muted);
-
-            cursor: pointer;
-
-            font-size: 16px;
-        }
-
-
-        /* =========================================================
-           BUTTON
-        ========================================================= */
-
-        .analyze-btn {
-            position: relative;
-
-            overflow: hidden;
-
-            width: 100%;
-
-            margin-top: 15px;
-
-            padding: 16px;
-
-            border: none;
-
-            border-radius: 14px;
-
-            background:
-                linear-gradient(
-                    110deg,
-                    #2563eb,
-                    #7c3aed,
-                    #0891b2
-                );
-
-            background-size: 200%;
-
-            color: white;
-
-            font-size: 14px;
-
-            font-weight: 750;
-
-            cursor: pointer;
-
-            box-shadow:
-                0 12px 35px
-                rgba(37,99,235,0.22);
-
-            transition:
-                0.3s;
-
-            animation:
-                buttonGradient 4s ease infinite;
-        }
-
-
-        @keyframes buttonGradient {
-
-            0% {
-                background-position: 0%;
-            }
-
-            50% {
-                background-position: 100%;
-            }
-
-            100% {
-                background-position: 0%;
-            }
-
-        }
-
-
-        .analyze-btn::before {
-            content: "";
-
-            position: absolute;
-
-            width: 100px;
-            height: 100%;
-
-            left: -150px;
-
-            top: 0;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255,255,255,0.25),
-                    transparent
-                );
-
-            transform:
-                skewX(-20deg);
-
-            animation:
-                buttonShine 4s infinite;
-        }
-
-
-        @keyframes buttonShine {
-
-            0%, 40% {
-                left: -150px;
-            }
-
-            65%, 100% {
-                left: 120%;
-            }
-
-        }
-
-
-        .analyze-btn:hover {
-            transform:
-                translateY(-3px);
-
-            box-shadow:
-                0 18px 45px
-                rgba(37,99,235,0.35);
-        }
-
-
-        /* =========================================================
-           PRIVACY
-        ========================================================= */
-
-        .privacy-box {
-            display: flex;
-
-            gap: 12px;
-
-            margin-top: 20px;
-
-            padding: 15px;
-
-            border-radius: 15px;
-
-            border:
-                1px solid
-                rgba(34,197,94,0.12);
-
-            background:
-                rgba(34,197,94,0.035);
-        }
-
-
-        .privacy-icon {
-            font-size: 20px;
-        }
-
-
-        .privacy-box strong {
-            display: block;
-
-            font-size: 12px;
-
-            margin-bottom: 4px;
-        }
-
-
-        .privacy-box span {
-            color: var(--muted);
-
-            font-size: 10px;
-
-            line-height: 1.6;
-        }
-
-
-        /* =========================================================
-           EMPTY STATE
-        ========================================================= */
-
-        #emptyState {
-            text-align: center;
-
-            padding:
-                45px 10px;
-        }
-
-
-        .radar {
-            position: relative;
-
-            width: 120px;
-            height: 120px;
-
-            margin:
-                0 auto 25px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(34,211,238,0.25);
-
-            background:
-                radial-gradient(
-                    circle,
-                    rgba(34,211,238,0.1),
-                    transparent 65%
-                );
-
-            animation:
-                radarPulse 3s infinite;
-        }
-
-
-        .radar::before,
-        .radar::after {
-            content: "";
-
-            position: absolute;
-
-            inset: 18px;
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(34,211,238,0.18);
-        }
-
-
-        .radar::after {
-            inset: 38px;
-        }
-
-
-        .radar-line {
-            position: absolute;
-
-            width: 50%;
-
-            height: 1px;
-
-            top: 50%;
-            left: 50%;
-
-            transform-origin:
-                left center;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    var(--cyan),
-                    transparent
-                );
-
-            animation:
-                radarSpin 2.5s linear infinite;
-        }
-
-
-        @keyframes radarSpin {
-
-            from {
-                transform:
-                    rotate(0deg);
-            }
-
-            to {
-                transform:
-                    rotate(360deg);
-            }
-
-        }
-
-
-        @keyframes radarPulse {
-
-            0%, 100% {
-                box-shadow:
-                    0 0 15px
-                    rgba(34,211,238,0.08);
-            }
-
-            50% {
-                box-shadow:
-                    0 0 45px
-                    rgba(34,211,238,0.18);
-            }
-
-        }
-
-
-        .empty-title {
-            font-weight: 750;
-
-            margin-bottom: 8px;
-        }
-
-
-        .empty-text {
-            color: #64748b;
-
-            font-size: 11px;
-
-            line-height: 1.7;
-        }
-
-
-        /* =========================================================
-           RESULTS
-        ========================================================= */
-
-        #results {
-            display: none;
-
-            animation:
-                resultAppear 0.7s ease both;
-        }
-
-
-        @keyframes resultAppear {
-
-            from {
-                opacity: 0;
-
-                transform:
-                    scale(0.96)
-                    translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-
-                transform:
-                    scale(1)
-                    translateY(0);
-            }
-
-        }
-
-
-        .score-area {
-            position: relative;
-
-            display: flex;
-
-            justify-content: center;
-
-            margin:
-                5px 0 28px;
-        }
-
-
-        .score-ring {
-            position: relative;
-
-            width: 200px;
-            height: 200px;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            background:
-                conic-gradient(
-                    var(--cyan)
-                    0deg,
-
-                    var(--purple)
-                    calc(var(--score) * 0.65),
-
-                    var(--blue)
-                    var(--score),
-
-                    rgba(51,65,85,0.3)
-                    var(--score),
-
-                    rgba(51,65,85,0.3)
-                    360deg
-                );
-
-            box-shadow:
-                0 0 55px
-                rgba(79,140,255,0.12),
-
-                inset
-                0 0 30px
-                rgba(34,211,238,0.05);
-
-            animation:
-                scoreGlow 3s ease-in-out infinite;
-        }
-
-
-        @keyframes scoreGlow {
-
-            0%, 100% {
-                filter:
-                    drop-shadow(
-                        0 0 5px
-                        rgba(34,211,238,0.15)
-                    );
-            }
-
-            50% {
-                filter:
-                    drop-shadow(
-                        0 0 18px
-                        rgba(168,85,247,0.25)
-                    );
-            }
-
-        }
-
-
-        .score-ring::before {
-            content: "";
-
-            position: absolute;
-
-            width: 164px;
-            height: 164px;
-
-            border-radius: 50%;
-
-            background:
-                radial-gradient(
-                    circle,
-                    #10192f,
-                    #070d1c
-                );
-
-            box-shadow:
-                inset
-                0 0 30px
-                rgba(0,0,0,0.45);
-        }
-
-
-        .score-content {
-            position: relative;
-
-            text-align: center;
-        }
-
-
-        .score-number {
-            font-size: 43px;
-
-            font-weight: 850;
-
-            letter-spacing: -2px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    white,
-                    #93c5fd
-                );
-
-            -webkit-background-clip: text;
-background-clip: text;
--webkit-text-fill-color: transparent;
-        }
-
-
-        .score-label {
-            color: var(--muted);
-
-            font-size: 9px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1.5px;
-        }
-
-
-        /* =========================================================
-           METRICS
-        ========================================================= */
-
-        .metrics {
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
-
-            gap: 11px;
-        }
-
-
-        .metric {
-            padding: 16px;
-
-            border-radius: 15px;
-
-            background:
-                rgba(2,6,23,0.45);
-
-            border:
-                1px solid
-                rgba(148,163,184,0.08);
-
-            transition:
-                0.3s;
-
-            animation:
-                metricAppear 0.6s ease both;
-        }
-
-
-        .metric:hover {
-            transform:
-                translateY(-4px);
-
-            border-color:
-                rgba(79,140,255,0.25);
-
-            background:
-                rgba(20,29,55,0.7);
-
-            box-shadow:
-                0 10px 30px
-                rgba(0,0,0,0.2);
-        }
-
-
-        @keyframes metricAppear {
-
-            from {
-                opacity: 0;
-
-                transform:
-                    translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-
-                transform:
-                    translateY(0);
-            }
-
-        }
-
-
-        .metric-header {
-            display: flex;
-
-            justify-content:
-                space-between;
-
-            margin-bottom: 9px;
-        }
-
-
-        .metric-name {
-            color: var(--muted);
-
-            font-size: 9px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1px;
-        }
-
-
-        .metric-icon {
-            font-size: 14px;
-        }
-
-
-        .metric-value {
-            font-size: 23px;
-
-            font-weight: 800;
-        }
-
-
-        /* =========================================================
-           RISK
-        ========================================================= */
-
-        .risk-box {
-            position: relative;
-
-            overflow: hidden;
-
-            margin-top: 11px;
-
-            padding: 18px;
-
-            border-radius: 15px;
-
-            text-align: center;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    rgba(79,140,255,0.06),
-                    rgba(168,85,247,0.05)
-                );
-
-            border:
-                1px solid
-                rgba(79,140,255,0.12);
-        }
-
-
-        .risk-box::before {
-            content: "";
-
-            position: absolute;
-
-            left: 0;
-            right: 0;
-
-            top: 0;
-
-            height: 1px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    var(--cyan),
-                    var(--purple),
-                    transparent
-                );
-
-            animation:
-                riskScan 3s linear infinite;
-        }
-
-
-        @keyframes riskScan {
-
-            from {
-                transform:
-                    translateX(-100%);
-            }
-
-            to {
-                transform:
-                    translateX(100%);
-            }
-
-        }
-
-
-        .risk-label {
-            color: var(--muted);
-
-            font-size: 9px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1.4px;
-        }
-
-
-        #overall {
-            margin-top: 6px;
-
-            font-size: 20px;
-
-            font-weight: 850;
-        }
-
-
-        /* =========================================================
-           STATUS
-        ========================================================= */
-
-        .status {
-            display: flex;
-
-            justify-content:
-                space-between;
-
-            gap: 10px;
-
-            margin-top: 13px;
-
-            color: #64748b;
-
-            font-size: 9px;
-        }
-
-
-        .status span:first-child {
-            color: #4ade80;
-        }
-
-
-        /* =========================================================
-           LOADING
-        ========================================================= */
-
-        .loading {
-            display: none;
-
-            text-align: center;
-
-            margin-top: 13px;
-
-            color: var(--muted);
-
-            font-size: 10px;
-        }
-
-
-        .spinner {
-            display: inline-block;
-
-            width: 13px;
-            height: 13px;
-
-            border:
-                2px solid
-                #263653;
-
-            border-top-color:
-                var(--cyan);
-
-            border-right-color:
-                var(--purple);
-
-            border-radius: 50%;
-
-            animation:
-                spin 0.7s linear infinite;
-
-            vertical-align: middle;
-
-            margin-right: 5px;
-        }
-
-
-        @keyframes spin {
-
-            to {
-                transform:
-                    rotate(360deg);
-            }
-
-        }
-
-
-        /* =========================================================
-           FOOTER
-        ========================================================= */
-
-        footer {
-            text-align: center;
-
-            margin-top: 30px;
-
-            color: #475569;
-
-            font-size: 10px;
-        }
-
-
-        footer span {
-            color: #64748b;
-        }
-
-
-        /* =========================================================
-           RESPONSIVE
-        ========================================================= */
-
-        @media (max-width: 850px) {
-
-            .dashboard {
-                grid-template-columns:
-                    1fr;
-            }
-
-            .system-status {
-                display: none;
-            }
-
-        }
-
-
-        @media (max-width: 500px) {
-
-            nav {
-                padding-top: 18px;
-            }
-
-            main {
-                margin-top: 15px;
-            }
-
-            .hero h1 {
-                letter-spacing: -2px;
-            }
-
-            .panel {
-                padding: 20px;
-                border-radius: 20px;
-            }
-
-            .metrics {
-                grid-template-columns:
-                    1fr;
-            }
-
-            .score-ring {
-                width: 175px;
-                height: 175px;
-            }
-
-            .score-ring::before {
-                width: 145px;
-                height: 145px;
-            }
-
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipher // Password Auditor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* =========================================================
+   TOKENS — porcelain / lavender / coral
+   Signature element: a rotating 3D "tumbler lock" built
+   from stacked CSS discs whose pins drop as the scan runs.
+========================================================= */
+
+:root{
+  --bg-a:#F5F1EC;
+  --bg-b:#ECE7FA;
+  --panel: rgba(255,255,255,.74);
+  --panel-edge: rgba(255,255,255,.9);
+  --ink:#1E1B2E;
+  --muted:#7A7288;
+  --line: rgba(30,27,46,.09);
+
+  --coral:#FF6F5E;
+  --coral-deep:#E14F45;
+  --indigo:#4B3F72;
+  --indigo-deep:#2E2650;
+  --mint:#2FAE87;
+  --amber:#E2A23B;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;min-height:100%;}
+
+body{
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,111,94,.16), transparent 32%),
+    radial-gradient(circle at 90% 15%, rgba(75,63,114,.14), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(47,174,135,.10), transparent 38%),
+    linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  min-height:100vh;
+  overflow-x:hidden;
+  perspective: 1600px;
+}
+
+/* =========================================================
+   AMBIENT FIELD — soft drifting light discs (bokeh, not particles)
+========================================================= */
+.field{ position:fixed; inset:0; z-index:-2; pointer-events:none; }
+.bokeh{
+  position:absolute; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), rgba(255,255,255,0) 70%);
+  opacity:.55; filter: blur(1px);
+  animation: drift linear infinite;
+}
+@keyframes drift{
+  from{ transform: translateY(6vh) translateX(0) scale(1); }
+  50%{ transform: translateY(-3vh) translateX(2vw) scale(1.08); }
+  to{ transform: translateY(6vh) translateX(0) scale(1); }
+}
+
+/* =========================================================
+   STAGE
+========================================================= */
+.app{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding: 40px 24px;
+}
+
+.rig{
+  width:min(980px, 96vw);
+  transform-style: preserve-3d;
+  transition: transform .15s ease-out;
+}
+
+.interface{
+  position:relative;
+  background: var(--panel);
+  border:1px solid var(--panel-edge);
+  border-radius: 28px;
+  backdrop-filter: blur(22px);
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.6) inset,
+    0 40px 90px -30px rgba(46,38,80,.35),
+    0 10px 30px -10px rgba(255,111,94,.18);
+  overflow:hidden;
+  transform-style: preserve-3d;
+  animation: rise .9s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes rise{
+  from{ opacity:0; transform: translateY(28px) rotateX(8deg) scale(.96); }
+  to{ opacity:1; transform: translateY(0) rotateX(0) scale(1); }
+}
+
+.hairline{
+  height:3px; width:100%;
+  background: linear-gradient(90deg, transparent, var(--coral), var(--indigo), var(--mint), var(--coral), transparent);
+  background-size: 260% 100%;
+  animation: sweep 4s linear infinite;
+}
+@keyframes sweep{ from{background-position:0%;} to{background-position:260%;} }
+
+.header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 22px 32px; border-bottom:1px solid var(--line);
+}
+.logo{ font-family:var(--font-display); font-weight:700; letter-spacing:.02em; font-size:15px; }
+.logo em{ font-style:normal; color:var(--coral); }
+.status{ display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.14em;}
+.dot{ width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px rgba(47,174,135,.7);
+  animation: blink 1.6s infinite; }
+@keyframes blink{ 50%{ opacity:.3; transform:scale(.7);} }
+
+/* =========================================================
+   SCREENS
+========================================================= */
+.screen{ display:none; grid-template-columns: 1.1fr .9fr; gap:36px; padding:56px; }
+.screen.active{ display:grid; animation: enter .6s cubic-bezier(.2,.8,.2,1); }
+@keyframes enter{ from{opacity:0; transform:translateX(24px);} to{opacity:1; transform:translateX(0);} }
+
+.eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.3em; color:var(--coral-deep); margin-bottom:16px; }
+
+.copy h1{
+  font-family:var(--font-display); font-weight:900; letter-spacing:-.03em;
+  font-size:clamp(38px,5vw,58px); line-height:.98; color:var(--indigo-deep);
+}
+.copy p{ margin-top:18px; max-width:440px; color:var(--muted); line-height:1.7; font-size:14.5px; }
+
+.input-wrap{ margin-top:34px; position:relative; }
+.input-wrap::before{
+  content:""; position:absolute; inset:-2px; border-radius:16px;
+  background: linear-gradient(120deg, var(--coral), var(--indigo), var(--mint), var(--coral));
+  background-size:260% 100%; animation: sweep 5s linear infinite; z-index:-1;
+}
+.pw{
+  width:100%; padding:19px 20px; border:0; border-radius:14px;
+  background:#FFFFFF; color:var(--ink); font-size:17px; outline:none; letter-spacing:.05em;
+  box-shadow: 0 1px 0 rgba(255,255,255,.9) inset;
+}
+.pw::placeholder{ color:#B9B2C4; }
+
+.go{
+  margin-top:16px; width:100%; padding:17px; border:0; border-radius:14px;
+  color:#FFF7F3; font-family:var(--font-display); font-weight:700; font-size:13px; letter-spacing:.06em;
+  cursor:pointer;
+  background: linear-gradient(120deg, var(--coral-deep), var(--coral), var(--indigo), var(--coral-deep));
+  background-size:260% 100%; animation: sweep 6s linear infinite;
+  box-shadow: 0 14px 30px -10px rgba(225,79,69,.55);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.go:hover{ transform: translateY(-3px); box-shadow: 0 20px 40px -12px rgba(225,79,69,.6); }
+.go:active{ transform: scale(.98); }
+
+.foot{ margin-top:34px; display:flex; justify-content:space-between; color:#A79FB2; font-family:var(--font-mono); font-size:9px; letter-spacing:.14em; grid-column:1/-1;}
+
+/* =========================================================
+   SIGNATURE 3D ELEMENT — the tumbler lock
+   A stack of discs rotating in 3D; five "pins" hang above
+   it and drop into the cylinder as each scan stage completes.
+========================================================= */
+.lock-stage{
+  display:flex; align-items:center; justify-content:center;
+  perspective: 900px;
+}
+.lock{
+  position:relative; width:190px; height:190px;
+  transform-style:preserve-3d;
+  animation: idleSpin 9s linear infinite;
+}
+@keyframes idleSpin{ from{transform:rotateY(0deg) rotateX(8deg);} to{transform:rotateY(360deg) rotateX(8deg);} }
+
+.disc{
+  position:absolute; left:50%; top:50%; width:150px; height:150px; margin:-75px;
+  border-radius:50%;
+  border:1.5px solid rgba(30,27,46,.14);
+  background: linear-gradient(155deg, rgba(255,255,255,.9), rgba(236,231,250,.5));
+  box-shadow: 0 0 0 1px rgba(255,255,255,.5) inset, 0 20px 40px -18px rgba(46,38,80,.4);
+  transform-style:preserve-3d;
+}
+.disc.d1{ transform: translateZ(28px); }
+.disc.d2{ transform: translateZ(0px); }
+.disc.d3{ transform: translateZ(-28px); border-color: rgba(225,79,69,.28); }
+
+.core{
+  position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px;
+  border-radius:50%; transform: translateZ(30px);
+  background: radial-gradient(circle at 35% 30%, #fff, var(--coral) 75%);
+  box-shadow: 0 0 24px rgba(255,111,94,.55);
+}
+
+.pin{
+  position:absolute; left:50%; width:6px; height:64px; margin-left:-3px;
+  border-radius:6px;
+  background: linear-gradient(180deg, var(--indigo), var(--indigo-deep));
+  transform-origin: top center;
+  top: -70px;
+  transition: transform .55s cubic-bezier(.2,.8,.2,1), background .3s;
+}
+.pin.dropped{ transform: translateY(70px); background: linear-gradient(180deg, var(--mint), #1f8e6c); }
+.pin.p1{ transform: rotateY(0deg) translateX(0); }
+.pin.p2{ transform: rotateY(72deg) translateX(0); }
+.pin.p3{ transform: rotateY(144deg) translateX(0); }
+.pin.p4{ transform: rotateY(216deg) translateX(0); }
+.pin.p5{ transform: rotateY(288deg) translateX(0); }
+.pin.p1.dropped{ transform: rotateY(0deg) translateY(70px); }
+.pin.p2.dropped{ transform: rotateY(72deg) translateY(70px); }
+.pin.p3.dropped{ transform: rotateY(144deg) translateY(70px); }
+.pin.p4.dropped{ transform: rotateY(216deg) translateY(70px); }
+.pin.p5.dropped{ transform: rotateY(288deg) translateY(70px); }
+
+/* =========================================================
+   TELEMETRY (screen 2)
+========================================================= */
+.telemetry-row{ display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-bottom:8px; }
+.bar{ height:6px; background: rgba(30,27,46,.07); border-radius:10px; overflow:hidden; margin-bottom:22px; }
+.fill{ width:0%; height:100%; border-radius:inherit; background: linear-gradient(90deg, var(--coral), var(--indigo), var(--mint)); box-shadow:0 0 12px rgba(255,111,94,.4); transition: width .3s ease; }
+
+.terminal{
+  margin-top:8px; background:#FBFAF7; border:1px solid var(--line); border-radius:16px; padding:18px;
+  height:150px; overflow:hidden; font-family:var(--font-mono); font-size:11.5px; color:var(--indigo-deep);
+  box-shadow: inset 0 2px 10px rgba(30,27,46,.05);
+}
+.log{ margin:5px 0; animation: logIn .3s ease; }
+.log b{ color: var(--coral-deep); }
+@keyframes logIn{ from{opacity:0; transform:translateX(-10px);} to{opacity:1; transform:translateX(0);} }
+
+/* =========================================================
+   RESULTS (screen 3) — 3D flip cards
+========================================================= */
+.results-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:8px; }
+.flip-outer{ perspective: 800px; }
+.flip-inner{
+  position:relative; border-radius:18px; min-height:120px;
+  transform-style:preserve-3d; transition: transform .8s cubic-bezier(.2,.8,.2,1);
+}
+.flip-outer.flipped .flip-inner{ transform: rotateY(180deg); }
+.face{
+  position:absolute; inset:0; border-radius:18px; backface-visibility:hidden;
+  padding:22px; background: rgba(255,255,255,.7); border:1px solid var(--line);
+  display:flex; flex-direction:column; justify-content:center;
+}
+.face.back{ transform: rotateY(180deg); background: linear-gradient(135deg, rgba(255,111,94,.14), rgba(75,63,114,.1)); }
+.face .label{ font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; color:var(--muted); }
+.face .value{ font-family:var(--font-display); font-size:32px; font-weight:900; margin-top:8px; color:var(--indigo-deep); }
+
+.overall{ margin-top:20px; padding:24px; border-radius:18px; text-align:center;
+  background: linear-gradient(135deg, rgba(255,111,94,.14), rgba(47,174,135,.10));
+  border:1px solid var(--line); }
+.overall .label{ font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; color:var(--muted); }
+.overall .value{ margin-top:8px; font-family:var(--font-display); font-size:28px; font-weight:900; color:var(--coral-deep); }
+
+@media(max-width:760px){
+  .screen{ grid-template-columns:1fr; padding:32px 22px; }
+  .lock-stage{ order:-1; margin-bottom:8px; }
+  .results-grid{ grid-template-columns:1fr; }
+}
+</style>
 </head>
-
-
 <body>
 
+<div class="field" id="field"></div>
 
-<!-- =========================================================
-     BACKGROUND
-========================================================= -->
+<div class="app">
+<div class="rig" id="rig">
+<div class="interface">
 
-<div class="grid-background"></div>
+  <div class="hairline"></div>
 
-<div class="glow one"></div>
-<div class="glow two"></div>
-<div class="glow three"></div>
+  <header class="header">
+    <div class="logo">CIPHER<em>//</em>AUDIT</div>
+    <div class="status"><span class="dot"></span> SYSTEM READY</div>
+  </header>
 
+  <!-- SCREEN 1 -->
+  <section id="screen1" class="screen active">
+    <div class="copy">
+      <div class="eyebrow">SECURE INPUT</div>
+      <h1>Audit your<br>password.</h1>
+      <p>Enter a password to run a local strength and exposure check. Nothing is stored — the value is used only for this audit.</p>
 
-<div class="particles">
+      <div class="input-wrap">
+        <input id="pw" class="pw" type="password" placeholder="Enter password…" autocomplete="off">
+      </div>
+      <button class="go" onclick="startAudit()">PRESS ENTER → RUN AUDIT</button>
+    </div>
 
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
+    <div class="lock-stage">
+      <div class="lock" id="lockIdle">
+        <div class="disc d3"></div>
+        <div class="disc d2"></div>
+        <div class="disc d1"></div>
+        <div class="core"></div>
+      </div>
+    </div>
+
+    <div class="foot"><span>ENCRYPTED INPUT CHANNEL</span><span>ENGINE v2.0</span></div>
+  </section>
+
+  <!-- SCREEN 2 -->
+  <section id="screen2" class="screen">
+    <div class="copy">
+      <div class="eyebrow">SCANNING</div>
+      <h1>Turning<br>the pins.</h1>
+      <p>Checking character entropy, common patterns, and known breach exposure.</p>
+
+      <div style="margin-top:30px;">
+        <div class="telemetry-row"><span>CHARACTER ENTROPY</span><span id="progress1">0%</span></div>
+        <div class="bar"><div id="bar1" class="fill"></div></div>
+        <div class="telemetry-row"><span>PATTERN ANALYSIS</span><span id="progress2">0%</span></div>
+        <div class="bar"><div id="bar2" class="fill"></div></div>
+        <div class="telemetry-row"><span>BREACH DATABASE</span><span id="progress3">0%</span></div>
+        <div class="bar"><div id="bar3" class="fill"></div></div>
+      </div>
+
+      <div id="terminal" class="terminal"></div>
+    </div>
+
+    <div class="lock-stage">
+      <div class="lock" id="lockScan" style="animation-duration:2.4s;">
+        <div class="disc d3"></div>
+        <div class="disc d2"></div>
+        <div class="disc d1"></div>
+        <div class="core"></div>
+        <div class="pin p1" id="pin1"></div>
+        <div class="pin p2" id="pin2"></div>
+        <div class="pin p3" id="pin3"></div>
+        <div class="pin p4" id="pin4"></div>
+        <div class="pin p5" id="pin5"></div>
+      </div>
+    </div>
+
+    <div class="foot"><span>LIVE TELEMETRY</span><span id="scanStatus">ANALYZING…</span></div>
+  </section>
+
+  <!-- SCREEN 3 -->
+  <section id="screen3" class="screen" style="grid-template-columns:1fr;">
+    <div class="copy" style="max-width:none;">
+      <div class="eyebrow">RESULT</div>
+      <h1>Audit<br>complete.</h1>
+
+      <div class="results-grid">
+        <div class="flip-outer" id="flip1">
+          <div class="flip-inner">
+            <div class="face front"><div class="label">PASSWORD STRENGTH</div><div class="value">--/100</div></div>
+            <div class="face back"><div class="label">PASSWORD STRENGTH</div><div id="strength" class="value">--/100</div></div>
+          </div>
+        </div>
+        <div class="flip-outer" id="flip2">
+          <div class="flip-inner">
+            <div class="face front"><div class="label">BREACH RISK</div><div class="value">--/100</div></div>
+            <div class="face back"><div class="label">BREACH RISK</div><div id="breach" class="value">--/100</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overall">
+        <div class="label">OVERALL SECURITY ASSESSMENT</div>
+        <div id="overall" class="value">--</div>
+      </div>
+
+      <button class="go" style="margin-top:20px;" onclick="resetAudit()">← AUDIT ANOTHER PASSWORD</button>
+      <div class="foot"><span>ANALYSIS COMPLETE</span><span>NO PASSWORD DISPLAYED</span></div>
+    </div>
+  </section>
 
 </div>
-
-
-<!-- =========================================================
-     NAVBAR
-========================================================= -->
-
-<nav>
-
-    <div class="brand">
-
-        <div class="brand-icon"></div>
-
-        Password Auditor
-
-    </div>
-
-
-    <div class="system-status">
-
-        <span class="status-dot"></span>
-
-        SECURITY SYSTEM ONLINE
-
-    </div>
-
-</nav>
-
-
-<!-- =========================================================
-     MAIN
-========================================================= -->
-
-<main>
-
-
-    <section class="hero">
-
-        <div class="eyebrow">
-            Password Intelligence Engine
-        </div>
-
-
-        <h1>
-
-            Don't guess your security.
-
-            <br>
-
-            <span class="gradient-text">
-                Measure it.
-            </span>
-
-        </h1>
-
-
-        <p>
-
-            Analyze password strength, detect predictable
-            patterns and identify exposure in known data
-            breaches using privacy-preserving analysis.
-
-        </p>
-
-    </section>
-
-
-
-    <section class="dashboard">
-
-
-        <!-- =====================================================
-             INPUT PANEL
-        ====================================================== -->
-
-        <div class="panel">
-
-            <div class="panel-title">
-
-                <strong>01</strong>
-
-                &nbsp; SECURITY INPUT
-
-            </div>
-
-
-            <label
-                class="input-label"
-                for="pw"
-            >
-
-                Enter password
-
-            </label>
-
-
-            <div class="input-wrapper">
-
-                <input
-                    type="password"
-                    id="pw"
-                    placeholder="Enter password..."
-                    autocomplete="off"
-                >
-
-
-                <button
-                    type="button"
-                    class="toggle-password"
-                    onclick="togglePassword()"
-                >
-
-                    ◉
-
-                </button>
-
-            </div>
-
-
-            <button
-                class="analyze-btn"
-                id="analyzeBtn"
-                onclick="audit()"
-            >
-
-                Analyze Security
-                &nbsp; →
-
-            </button>
-
-
-            <div
-                class="loading"
-                id="loading"
-            >
-
-                <span class="spinner"></span>
-
-                Scanning password intelligence...
-
-            </div>
-
-
-            <div class="privacy-box">
-
-                <div class="privacy-icon">
-                    🛡️
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Privacy-preserving scan
-                    </strong>
-
-
-                    <span>
-
-                        Your plaintext password never leaves
-                        this application. The breach lookup
-                        uses a partial SHA-1 hash.
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =====================================================
-             RESULTS PANEL
-        ====================================================== -->
-
-        <div class="panel">
-
-            <div class="panel-title">
-
-                <strong>02</strong>
-
-                &nbsp; SECURITY TELEMETRY
-
-            </div>
-
-
-            <!-- EMPTY -->
-
-            <div id="emptyState">
-
-                <div class="radar">
-
-                    <div class="radar-line"></div>
-
-                </div>
-
-
-                <div class="empty-title">
-
-                    Awaiting security scan
-
-                </div>
-
-
-                <div class="empty-text">
-
-                    Enter a password to initialize
-                    the security analysis engine.
-
-                </div>
-
-            </div>
-
-
-            <!-- RESULTS -->
-
-            <div id="results">
-
-
-                <div class="score-area">
-
-                    <div
-                        class="score-ring"
-                        id="scoreRing"
-                        style="--score: 0deg;"
-                    >
-
-                        <div class="score-content">
-
-                            <div
-                                class="score-number"
-                                id="strength"
-                            >
-                                0
-                            </div>
-
-
-                            <div class="score-label">
-
-                                Security Score
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="metrics">
-
-
-                    <div class="metric">
-
-                        <div class="metric-header">
-
-                            <span class="metric-name">
-                                Password Strength
-                            </span>
-
-                            <span class="metric-icon">
-                                ⚡
-                            </span>
-
-                        </div>
-
-
-                        <div
-                            class="metric-value"
-                            id="strengthSmall"
-                        >
-                            0/100
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="metric">
-
-                        <div class="metric-header">
-
-                            <span class="metric-name">
-                                Breach Exposure
-                            </span>
-
-                            <span class="metric-icon">
-                                🛡️
-                            </span>
-
-                        </div>
-
-
-                        <div
-                            class="metric-value"
-                            id="breach"
-                        >
-                            0/100
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-
-                <div class="risk-box">
-
-                    <div class="risk-label">
-
-                        Overall Threat Assessment
-
-                    </div>
-
-
-                    <div id="overall">
-
-                        --
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="status">
-
-                    <span>
-                        ● Analysis complete
-                    </span>
-
-
-                    <span id="breachStatus">
-                        Awaiting scan
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <footer>
-
-        Password Security Auditor
-
-        <span>•</span>
-
-        Privacy-first password intelligence
-
-        <span>•</span>
-
-        Local analysis engine
-
-    </footer>
-
-</main>
-
-
+</div>
+</div>
 
 <script>
-
-
-    /* =========================================================
-       PASSWORD VISIBILITY
-    ========================================================= */
-
-    function togglePassword() {
-
-        const password =
-            document.getElementById("pw");
-
-        if (
-            password.type === "password"
-        ) {
-
-            password.type = "text";
-
-        } else {
-
-            password.type = "password";
-
-        }
-
-    }
-
-
-
-    /* =========================================================
-       NUMBER ANIMATION
-    ========================================================= */
-
-    function animateNumber(
-        element,
-        target,
-        duration = 800
-    ) {
-
-        let start = 0;
-
-        const startTime =
-            performance.now();
-
-
-        function update(currentTime) {
-
-            const progress =
-                Math.min(
-                    (currentTime - startTime) /
-                    duration,
-                    1
-                );
-
-
-            const eased =
-                1 -
-                Math.pow(
-                    1 - progress,
-                    3
-                );
-
-
-            const current =
-                Math.round(
-                    start +
-                    (target - start) *
-                    eased
-                );
-
-
-            element.innerText =
-                current;
-
-
-            if (progress < 1) {
-
-                requestAnimationFrame(update);
-
-            }
-
-        }
-
-
-        requestAnimationFrame(update);
-
-    }
-
-
-
-    /* =========================================================
-       AUDIT
-    ========================================================= */
-
-    async function audit() {
-
-        const password =
-            document
-                .getElementById("pw")
-                .value;
-
-
-        if (!password) {
-
-            alert(
-                "Please enter a password first."
-            );
-
-            return;
-
-        }
-
-
-        const button =
-            document
-                .getElementById("analyzeBtn");
-
-
-        const loading =
-            document
-                .getElementById("loading");
-
-
-        button.disabled = true;
-
-        button.style.opacity =
-            "0.6";
-
-
-        loading.style.display =
-            "block";
-
-
-        try {
-
-
-            const response =
-                await fetch(
-                    "/audit",
-                    {
-
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                password:
-                                    password
-                            })
-
-                    }
-                );
-
-
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.error ||
-                    "Security audit failed"
-                );
-
-            }
-
-
-            /* Hide empty state */
-
-            document
-                .getElementById(
-                    "emptyState"
-                )
-                .style.display =
-                "none";
-
-
-            /* Show results */
-
-            document
-                .getElementById(
-                    "results"
-                )
-                .style.display =
-                "block";
-
-
-            const strength =
-                Number(
-                    data.metrics
-                        .strength_score
-                );
-
-
-            const breach =
-                data.metrics
-                    .breach_risk_score;
-
-
-            /* Score */
-
-            const scoreElement =
-                document
-                    .getElementById(
-                        "strength"
-                    );
-
-
-            animateNumber(
-                scoreElement,
-                strength
-            );
-
-
-            /* Small strength */
-
-            document
-                .getElementById(
-                    "strengthSmall"
-                )
-                .innerText =
-                `${strength}/100`;
-
-
-            /* Breach */
-
-            document
-                .getElementById(
-                    "breach"
-                )
-                .innerText =
-                breach === null
-                    ? "N/A"
-                    : `${breach}/100`;
-
-
-            /* Overall */
-
-            const overall =
-                document
-                    .getElementById(
-                        "overall"
-                    );
-
-
-            overall.innerText =
-                data.metrics
-                    .overall_risk;
-
-
-            /* Breach status */
-
-            document
-                .getElementById(
-                    "breachStatus"
-                )
-                .innerText =
-                data.breach_status;
-
-
-            /* =================================================
-               SCORE RING
-            ================================================= */
-
-            const degrees =
-                (strength / 100) *
-                360;
-
-
-            document
-                .getElementById(
-                    "scoreRing"
-                )
-                .style
-                .setProperty(
-                    "--score",
-                    `${degrees}deg`
-                );
-
-
-            /* =================================================
-               RISK COLORS
-            ================================================= */
-
-            if (
-                data.metrics
-                    .overall_risk
-                    .includes("CRITICAL")
-            ) {
-
-                overall.style.color =
-                    "#ef4444";
-
-
-            } else if (
-                data.metrics
-                    .overall_risk
-                    .includes("HIGH")
-            ) {
-
-                overall.style.color =
-                    "#f97316";
-
-
-            } else if (
-                data.metrics
-                    .overall_risk
-                    .includes("MODERATE")
-            ) {
-
-                overall.style.color =
-                    "#facc15";
-
-
-            } else {
-
-                overall.style.color =
-                    "#22c55e";
-
-            }
-
-
-            /* =================================================
-               SCORE RING COLOR
-            ================================================= */
-
-            const ring =
-                document
-                    .getElementById(
-                        "scoreRing"
-                    );
-
-
-            if (strength < 30) {
-
-                ring.style.background =
-                    `conic-gradient(
-                        #ef4444
-                        0deg,
-                        #f97316
-                        ${degrees}deg,
-                        rgba(51,65,85,.3)
-                        ${degrees}deg
-                    )`;
-
-            } else if (strength < 60) {
-
-                ring.style.background =
-                    `conic-gradient(
-                        #facc15
-                        0deg,
-                        #f97316
-                        ${degrees}deg,
-                        rgba(51,65,85,.3)
-                        ${degrees}deg
-                    )`;
-
-            } else {
-
-                ring.style.background =
-                    `conic-gradient(
-                        #22d3ee
-                        0deg,
-                        #8b5cf6
-                        ${degrees}deg,
-                        rgba(51,65,85,.3)
-                        ${degrees}deg
-                    )`;
-
-            }
-
-
-        } catch (error) {
-
-            console.error(error);
-
-
-            alert(
-                "Unable to analyze password:\n" +
-                error.message
-            );
-
-
-        } finally {
-
-            button.disabled =
-                false;
-
-            button.style.opacity =
-                "1";
-
-            loading.style.display =
-                "none";
-
-        }
-
-    }
-
-
-
-    /* =========================================================
-       ENTER KEY
-    ========================================================= */
-
-    document
-        .getElementById("pw")
-        .addEventListener(
-            "keydown",
-            function(event) {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    audit();
-
-                }
-
-            }
-        );
-
+/* Ambient bokeh field */
+const field = document.getElementById("field");
+for(let i=0;i<26;i++){
+  const b = document.createElement("div");
+  b.className = "bokeh";
+  const s = 4 + Math.random()*10;
+  b.style.width = s+"px"; b.style.height = s+"px";
+  b.style.left = Math.random()*100+"%";
+  b.style.top = Math.random()*100+"%";
+  b.style.animationDuration = (6+Math.random()*8)+"s";
+  b.style.animationDelay = (Math.random()*6)+"s";
+  field.appendChild(b);
+}
+
+/* 3D tilt of the whole interface, following the cursor */
+const rig = document.getElementById("rig");
+document.addEventListener("mousemove", (e)=>{
+  const rx = ((e.clientY / window.innerHeight) - 0.5) * -8;
+  const ry = ((e.clientX / window.innerWidth) - 0.5) * 10;
+  rig.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+});
+document.addEventListener("mouseleave", ()=>{ rig.style.transform = "rotateX(0) rotateY(0)"; });
+
+function showScreen(n){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen"+n).classList.add("active");
+}
+
+function addLog(text){
+  const t = document.getElementById("terminal");
+  const l = document.createElement("div");
+  l.className = "log";
+  l.innerHTML = "&gt; " + text;
+  t.appendChild(l);
+  t.scrollTop = t.scrollHeight;
+}
+
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function animateBar(barId, labelId, duration){
+  return new Promise(resolve=>{
+    let p = 0;
+    const iv = setInterval(()=>{
+      p += Math.random()*8;
+      if(p>=100){ p=100; clearInterval(iv); resolve(); }
+      document.getElementById(barId).style.width = p+"%";
+      document.getElementById(labelId).innerText = Math.floor(p)+"%";
+    }, duration/20);
+  });
+}
+
+async function dropPin(id){
+  document.getElementById(id).classList.add("dropped");
+  await wait(160);
+}
+
+async function startAudit(){
+  const password = document.getElementById("pw").value;
+  if(!password){
+    const input = document.getElementById("pw");
+    input.focus();
+    input.animate([
+      {transform:"translateX(-8px)"},{transform:"translateX(8px)"},
+      {transform:"translateX(-5px)"},{transform:"translateX(5px)"},{transform:"translateX(0)"}
+    ], {duration:350});
+    return;
+  }
+
+  showScreen(2);
+  document.getElementById("terminal").innerHTML = "";
+  ["pin1","pin2","pin3","pin4","pin5"].forEach(id=>document.getElementById(id).classList.remove("dropped"));
+
+  addLog("Initializing security engine…");
+  await wait(400);
+
+  addLog("Generating fingerprint…");
+  await Promise.all([animateBar("bar1","progress1",900), dropPin("pin1"), dropPin("pin2")]);
+
+  addLog("Running character entropy analysis…");
+  await Promise.all([animateBar("bar2","progress2",900), dropPin("pin3")]);
+
+  addLog("Scanning password patterns…");
+  await wait(300);
+  addLog("Querying breach database (k-anonymity range)…");
+  await Promise.all([animateBar("bar3","progress3",1100), dropPin("pin4"), dropPin("pin5")]);
+
+  addLog("<b>Finalizing security assessment…</b>");
+
+  try{
+    const response = await fetch("/audit", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ password })
+    });
+    if(!response.ok) throw new Error("Audit request failed");
+    const data = await response.json();
+
+    document.getElementById("strength").innerText = `${data.metrics.strength_score}/100`;
+    document.getElementById("breach").innerText = `${data.metrics.breach_risk_score}/100`;
+    document.getElementById("overall").innerText = data.metrics.overall_risk;
+    document.getElementById("scanStatus").innerText = "SCAN COMPLETE";
+
+    await wait(400);
+    showScreen(3);
+    document.getElementById("flip1").classList.add("flipped");
+    await wait(180);
+    document.getElementById("flip2").classList.add("flipped");
+
+  } catch(err){
+    addLog("ERROR: " + err.message);
+    document.getElementById("scanStatus").innerText = "SCAN FAILED";
+  }
+}
+
+function resetAudit(){
+  document.getElementById("pw").value = "";
+  ["bar1","bar2","bar3"].forEach(id=>document.getElementById(id).style.width="0%");
+  ["progress1","progress2","progress3"].forEach(id=>document.getElementById(id).innerText="0%");
+  document.getElementById("terminal").innerHTML = "";
+  document.getElementById("scanStatus").innerText = "ANALYZING…";
+  document.getElementById("flip1").classList.remove("flipped");
+  document.getElementById("flip2").classList.remove("flipped");
+  showScreen(1);
+  setTimeout(()=>document.getElementById("pw").focus(), 250);
+}
+
+document.getElementById("pw").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){ e.preventDefault(); startAudit(); }
+});
 </script>
-
 
 </body>
 </html>
